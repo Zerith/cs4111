@@ -35,8 +35,8 @@ app = Flask(__name__, template_folder=tmpl_dir)
 #     DATABASEURI = "postgresql://biliris:foobar@104.196.18.7/w4111"
 #
 # DATABASEURI = "postgresql://user:password@104.196.18.7/w4111"
-DATABASEURI = "postgresql://postgres:postgres@127.0.0.1/HW2"
-
+# DATABASEURI = "postgresql://postgres:postgres@127.0.0.1/HW2"
+DATABASEURI = "postgresql://uf2110:pzdpzd@34.74.207.68/proj1part2"
 
 #
 # This line creates a database engine that knows how to connect to the URI above.
@@ -98,14 +98,6 @@ def index():
   # for example, the below file reads template/index.html
   #
   return render_template("index.html")
-
-#
-# This is an example of a different path.  You can see it at:
-# 
-#     localhost:8111/another
-#
-# Notice that the function name is another() rather than index()
-# The functions for each app.route need to have different names
 
 
 @app.route('/getDomainList')
@@ -182,6 +174,18 @@ def getOrgData():
     endpoints.append(getEndpointInfo(ip))
 
   orgData = {'name': orgname, 'endpoints': endpoints}
+  return jsonify(orgData)
+
+@app.route('/getByService')
+def getByService():
+  service = request.args.get('service')
+  result = engine.execute(text("SELECT Ex.IP FROM ExposesPort Ex, Implements I WHERE Ex.PortType = I.PortType AND Ex.PortNumber = I.PortNumber AND I.ServiceName = :name"), name=service)
+  endpoint_ips = [row[0] for row in result]
+  endpoints = []
+  for ip in endpoint_ips:
+    endpoints.append(getEndpointInfo(ip))
+
+  orgData = {'name': service, 'endpoints': endpoints}
   return jsonify(orgData)
 
 @app.route('/getOrgList')
